@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JalSeva — Water Tanker Directory</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f7f8fa;color:#111;padding:16px;max-width:1100px;margin:0 auto;}
+
+  /* ===== RED HEADER ===== */
+  .header{
+    background:linear-gradient(135deg,#dc2626,#b91c1c);
+    border-radius:14px;
+    padding:16px 22px;
+    margin-bottom:16px;
+    display:grid;
+    grid-template-columns:auto 1fr auto;
+    align-items:center;
+    gap:16px;
+    color:#fff;
+  }
+  .header-center{text-align:center;}
+  .header-center h1{font-size:28px;font-weight:800;letter-spacing:-0.8px;color:#fff;line-height:1.1;}
+  .header-center p{color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;}
+  .qr-btn{display:flex;flex-direction:column;align-items:center;text-decoration:none;cursor:pointer;background:rgba(255,255,255,0.12);padding:8px;border-radius:10px;transition:background 0.15s;}
+  .qr-btn:hover{background:rgba(255,255,255,0.22);}
+  .qr-btn img{width:52px;height:52px;border-radius:6px;background:#fff;display:block;}
+  .qr-btn span{font-size:9px;color:#fff;margin-top:4px;font-weight:700;text-align:center;letter-spacing:0.3px;max-width:60px;line-height:1.15;}
+
+  /* ===== HERO ===== */
+  .hero{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin-bottom:18px;}
+  .hero-head{text-align:center;margin-bottom:22px;}
+  .hero-head h2{font-size:24px;color:#111;line-height:1.3;margin-bottom:6px;font-weight:700;}
+  .hero-head p{color:#6b7280;font-size:14px;}
+
+  .hero-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+
+  /* PLANNING CARD (blue) */
+  .plan-card{background:linear-gradient(160deg,#eff6ff,#dbeafe);border:1px solid #93c5fd;border-radius:14px;padding:18px;}
+  .plan-badge{display:inline-block;background:#2563eb;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+  .plan-card h3{font-size:17px;color:#1e3a8a;margin-bottom:4px;font-weight:700;}
+  .plan-card .plan-sub{font-size:12px;color:#1e40af;margin-bottom:14px;line-height:1.5;}
+
+  .daily-row{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px;}
+  .day-btn{background:#fff;border:1px solid #bfdbfe;border-radius:7px;padding:7px 2px;text-align:center;cursor:pointer;transition:all 0.12s;}
+  .day-btn:hover{background:#dbeafe;border-color:#60a5fa;}
+  .day-btn .dow{font-size:8px;color:#3b82f6;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+  .day-btn .dd{font-size:13px;font-weight:700;margin-top:1px;color:#1e3a8a;}
+  .day-btn.today{border-color:#2563eb;border-width:2px;}
+  .day-btn.selected{background:#2563eb;border-color:#2563eb;}
+  .day-btn.selected .dow,.day-btn.selected .dd{color:#fff;}
+
+  .divider{display:flex;align-items:center;gap:8px;margin:12px 0;}
+  .divider hr{flex:1;border:none;border-top:1px solid #bfdbfe;}
+  .divider span{font-size:10px;color:#3b82f6;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+
+  .cal{background:#fff;border:1px solid #bfdbfe;border-radius:10px;padding:10px;}
+  .cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .cal-head .nav{background:transparent;border:none;color:#3b82f6;font-size:18px;cursor:pointer;padding:2px 8px;border-radius:6px;line-height:1;font-weight:700;}
+  .cal-head .nav:hover{background:#dbeafe;}
+  .cal-head .label{font-size:12px;font-weight:700;color:#1e3a8a;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .cal-dow{font-size:9px;color:#93c5fd;text-align:center;padding:3px 0;font-weight:700;text-transform:uppercase;}
+  .cal-day{font-size:11px;color:#1e3a8a;text-align:center;padding:5px 0;border-radius:5px;cursor:pointer;user-select:none;transition:background 0.1s;font-weight:500;}
+  .cal-day:hover{background:#dbeafe;}
+  .cal-day.empty{cursor:default;}
+  .cal-day.empty:hover{background:transparent;}
+  .cal-day.past{color:#cbd5e1;cursor:not-allowed;}
+  .cal-day.past:hover{background:transparent;}
+  .cal-day.today{border:1px solid #2563eb;font-weight:700;}
+  .cal-day.selected{background:#2563eb;color:#fff;font-weight:700;}
+
+  .plan-btn{background:#2563eb;color:#fff;border:none;padding:12px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:12px;}
+  .plan-btn:hover{background:#1d4ed8;}
+  .plan-btn:disabled{background:#93c5fd;color:#dbeafe;cursor:not-allowed;}
+
+  /* ===== REGISTER FORM (BLUE GRADIENT) ===== */
+  .reg-inline{background:linear-gradient(160deg,#dbeafe,#60a5fa);border:1px solid #3b82f6;border-radius:14px;padding:18px;display:flex;flex-direction:column;}
+  .reg-inline h3{font-size:17px;margin-bottom:4px;font-weight:700;color:#0c2557;}
+  .reg-inline .reg-sub{font-size:12px;color:#1e3a8a;margin-bottom:14px;line-height:1.5;}
+  .step-label{font-size:10px;color:#0c2557;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;}
+  .reg-inline input,.reg-inline select,.reg-inline textarea{width:100%;padding:10px 12px;border:1px solid #93c5fd;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;background:#fff;}
+  .reg-inline textarea{resize:vertical;min-height:56px;}
+  .reg-inline label.field{display:block;font-size:12px;color:#1e3a8a;margin-bottom:4px;font-weight:500;}
+  .btn-row{display:flex;gap:8px;margin-top:4px;}
+  .btn-row button{flex:1;padding:11px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-blue{background:#1e40af;color:#fff;}
+  .btn-blue:hover{background:#1e3a8a;}
+  .btn-gray{background:#bfdbfe;color:#1e3a8a;}
+  .step-note{background:#fff;color:#1e3a8a;font-size:11px;padding:9px 11px;border-radius:8px;margin-bottom:10px;line-height:1.5;border:1px solid #93c5fd;}
+  .err-msg{color:#991b1b;font-size:12px;margin-top:8px;background:#fff;padding:6px 9px;border-radius:6px;font-weight:500;}
+  .ok-msg{color:#065f46;font-size:13px;margin-top:8px;font-weight:600;background:#fff;padding:8px 10px;border-radius:6px;}
+
+  .er-strip{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid #93c5fd;}
+  .er-strip button{border:none;padding:12px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;color:#fff;}
+  .er-emergency{background:#dc2626;}
+  .er-emergency:hover{background:#b91c1c;}
+  .er-regular{background:#059669;}
+  .er-regular:hover{background:#047857;}
+
+  /* DEMAND */
+  .card-section{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:20px;margin-bottom:20px;}
+  .card-section h2{font-size:18px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .card-section .subtitle{color:#6b7280;font-size:13px;margin-bottom:16px;line-height:1.5;}
+  .counter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .counter-item{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px;transition:all 0.15s;}
+  .counter-item:hover{border-color:#93c5fd;box-shadow:0 2px 8px rgba(37,99,235,0.08);transform:translateY(-1px);}
+  .counter-item .area-name{font-weight:700;font-size:15px;margin-bottom:6px;color:#111;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .counter-item .total{font-size:12px;color:#6b7280;margin-bottom:8px;}
+  .counter-item .split{display:flex;gap:6px;flex-wrap:wrap;font-size:11px;}
+  .chip{padding:3px 8px;border-radius:999px;font-weight:600;}
+  .chip.half{background:#dbeafe;color:#1e40af;}
+  .chip.full{background:#dcfce7;color:#166534;}
+  .chip.quarter{background:#fef3c7;color:#92400e;}
+  .sample-tag{display:inline-block;background:#f3f4f6;color:#9ca3af;font-size:9px;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+  .counter-note{background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:12px;padding:10px 14px;border-radius:8px;margin-top:14px;line-height:1.5;}
+  .counter-more{text-align:center;margin-top:14px;}
+  .counter-more button{background:#fff;border:1px solid #d1d5db;padding:9px 18px;border-radius:8px;font-size:13px;cursor:pointer;color:#374151;font-weight:500;}
+  .counter-more button:hover{background:#f9fafb;border-color:#93c5fd;color:#2563eb;}
+
+  /* SUPPLIER REGISTRATION */
+  .sup-section{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px;margin-bottom:20px;}
+  .sup-section h3{font-size:19px;color:#1e3a8a;margin-bottom:6px;font-weight:700;text-align:center;}
+  .sup-section .sup-sub{font-size:13px;color:#6b7280;margin-bottom:18px;line-height:1.5;text-align:center;}
+  .sup-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:flex-start;}
+
+  .sup-tanker-box{background:linear-gradient(160deg,#eff6ff,#dbeafe);border:1px solid #93c5fd;border-radius:12px;padding:18px;display:flex;align-items:center;justify-content:center;}
+  .sup-tanker-box svg{width:100%;max-width:100%;height:auto;display:block;}
+
+  .sup-form{display:flex;flex-direction:column;background:linear-gradient(160deg,#eff6ff,#dbeafe);border:1px solid #93c5fd;border-radius:12px;padding:16px;}
+  .sup-step-label{font-size:10px;color:#2563eb;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;}
+  .sup-form input,.sup-form select,.sup-form textarea{width:100%;padding:10px 12px;border:1px solid #bfdbfe;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;background:#fff;}
+  .sup-form textarea{resize:vertical;min-height:56px;}
+  .sup-consent{display:flex;gap:8px;font-size:12px;color:#1e40af;margin:6px 0 12px;align-items:flex-start;}
+  .sup-consent input{width:auto;margin-top:2px;}
+  .sup-step-note{background:#fff;color:#1e3a8a;font-size:11px;padding:9px 11px;border-radius:8px;margin-bottom:10px;line-height:1.5;border:1px solid #bfdbfe;}
+  .sup-btn-row{display:flex;gap:8px;}
+  .sup-btn-row button{flex:1;padding:11px;border-radius:8px;border:none;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-green{background:#2563eb;color:#fff;}
+  .btn-green:hover{background:#1d4ed8;}
+  .btn-green:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-light{background:#dbeafe;color:#1e3a8a;}
+
+  /* FILTERS */
+  .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;background:#fff;padding:14px;border-radius:12px;border:1px solid #e5e7eb;margin-bottom:20px;}
+  select{padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;}
+
+  /* SUPPLIER LISTING */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;}
+  .card h3{font-size:16px;}
+  .card .area-name{color:#6b7280;font-size:13px;margin-top:2px;}
+  .badge{background:#dcfce7;color:#166534;font-size:11px;padding:3px 8px;border-radius:999px;white-space:nowrap;}
+  .details{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:14px;}
+  .details span{color:#6b7280;}
+  .actions{display:flex;gap:8px;}
+  .btn{flex:1;text-align:center;padding:10px;border-radius:8px;color:#fff;text-decoration:none;font-weight:500;font-size:14px;border:none;cursor:pointer;font-family:inherit;}
+  .call{background:#2563eb;}.wa{background:#16a34a;}
+  .empty,.loading{text-align:center;color:#6b7280;padding:40px;}
+
+  /* ===== FOOTER (RED) ===== */
+  footer{
+    background:linear-gradient(135deg,#dc2626,#b91c1c);
+    border-radius:14px;
+    padding:22px;
+    margin-top:36px;
+    color:#fff;
+  }
+  .footer-inner{display:grid;grid-template-columns:1fr 1fr;gap:22px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.2);}
+  .footer-left h4,.footer-right h4{font-size:14px;margin-bottom:10px;color:#fff;font-weight:700;}
+  .footer-left p,.footer-right p{font-size:13px;color:rgba(255,255,255,0.92);margin-bottom:6px;line-height:1.6;}
+  .footer-left p b{color:#fff;font-weight:600;}
+  .footer-left a{color:#fff;text-decoration:underline;word-break:break-all;text-decoration-color:rgba(255,255,255,0.5);}
+  .footer-left a:hover{text-decoration-color:#fff;}
+  .footer-right .save-water{background:rgba(255,255,255,0.12);border-left:3px solid #fff;padding:9px 11px;border-radius:6px;color:#fff;font-size:12.5px;margin-top:10px;line-height:1.6;}
+  .footer-bottom{text-align:center;font-size:12px;color:rgba(255,255,255,0.85);padding-top:14px;line-height:1.6;}
+  .footer-bottom a{color:#fff;text-decoration:underline;text-decoration-color:rgba(255,255,255,0.5);}
+  .footer-bottom a:hover{text-decoration-color:#fff;}
+
+  /* MODAL */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:50;padding:20px;overflow-y:auto;align-items:flex-start;justify-content:center;}
+  .modal-bg.open{display:flex;}
+  .modal{background:#fff;border-radius:14px;padding:24px;max-width:480px;width:100%;margin:40px 0;}
+  .modal h2{font-size:20px;margin-bottom:12px;}
+  .modal p.sub{color:#6b7280;font-size:13px;margin-bottom:14px;line-height:1.5;}
+  .modal input,.modal select,.modal textarea{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;}
+  .modal textarea{resize:vertical;min-height:60px;}
+  .modal-actions{display:flex;gap:8px;margin-top:8px;}
+  .modal-actions button{flex:1;padding:11px;border-radius:8px;border:none;font-size:15px;font-weight:500;cursor:pointer;}
+  .cancel{background:#e5e7eb;color:#111;}
+  .send{background:#dc2626;color:#fff;}
+  .send-regular{background:#059669;color:#fff;}
+  .success{text-align:center;padding:20px 0;}
+  .success h2{color:#16a34a;}
+  .success button{margin-top:16px;padding:10px 24px;border:none;background:#2563eb;color:#fff;border-radius:8px;font-size:15px;cursor:pointer;}
+
+  /* ===== TABLET ===== */
+  @media (max-width:720px){
+    .hero-cols{grid-template-columns:1fr;}
+    .sup-cols{grid-template-columns:1fr;}
+    .hero-head h2{font-size:20px;}
+    .header-center h1{font-size:22px;}
+    .header-center p{font-size:12px;}
+    .qr-btn img{width:46px;height:46px;}
+    .footer-inner{grid-template-columns:1fr;gap:16px;}
+  }
+
+  /* ===== PHONE ===== */
+  @media (max-width:520px){
+    body{padding:10px;}
+
+    .header{
+      grid-template-columns:1fr 1fr;
+      grid-template-rows:auto auto;
+      gap:10px;
+      padding:14px 12px;
+      margin-bottom:12px;
+    }
+    .header-center{grid-column:1 / -1;grid-row:1;margin-bottom:4px;}
+    .header-center h1{font-size:24px;letter-spacing:-0.5px;}
+    .header-center p{font-size:11px;margin-top:2px;}
+    .qr-btn{grid-row:2;padding:10px 6px;}
+    .qr-btn img{width:52px;height:52px;}
+    .qr-btn span{font-size:10px;max-width:70px;line-height:1.2;}
+
+    .hero{padding:14px;margin-bottom:14px;}
+    .hero-head{margin-bottom:16px;}
+    .hero-head h2{font-size:18px;line-height:1.35;}
+    .hero-head p{font-size:12.5px;}
+
+    .plan-card{padding:14px;margin-bottom:14px;}
+    .plan-badge{font-size:9px;padding:3px 9px;}
+    .plan-card h3{font-size:15px;}
+    .plan-card .plan-sub{font-size:11.5px;margin-bottom:12px;}
+
+    .daily-row{gap:3px;margin-bottom:10px;}
+    .day-btn{padding:6px 1px;border-radius:6px;min-height:38px;}
+    .day-btn .dow{font-size:7px;letter-spacing:0;}
+    .day-btn .dd{font-size:12px;margin-top:2px;}
+
+    .cal{padding:8px;}
+    .cal-head{margin-bottom:4px;}
+    .cal-head .label{font-size:11.5px;}
+    .cal-head .nav{font-size:17px;padding:2px 7px;}
+    .cal-grid{gap:1px;}
+    .cal-dow{font-size:8px;padding:2px 0;}
+    .cal-day{font-size:11px;padding:5px 0;border-radius:4px;min-height:26px;line-height:16px;}
+
+    .plan-btn{padding:12px;font-size:13.5px;margin-top:10px;}
+
+    .reg-inline{padding:14px;margin-bottom:14px;}
+    .reg-inline h3{font-size:15.5px;}
+    .reg-inline .reg-sub{font-size:11.5px;}
+    .step-label{font-size:9.5px;}
+    .reg-inline input,.reg-inline select,.reg-inline textarea{
+      padding:12px;font-size:15px;margin-bottom:9px;border-radius:8px;
+    }
+    .reg-inline label.field{font-size:11.5px;}
+    .step-note{font-size:11px;padding:9px 10px;}
+    .btn-row button{padding:13px;font-size:14px;}
+
+    .er-strip{grid-template-columns:1fr;gap:8px;padding-top:12px;margin-top:12px;}
+    .er-strip button{padding:13px;font-size:14px;}
+
+    .card-section{padding:14px;margin-bottom:14px;}
+    .card-section h2{font-size:16px;}
+    .card-section .subtitle{font-size:12px;margin-bottom:12px;line-height:1.5;}
+    .counter-grid{grid-template-columns:1fr 1fr;gap:8px;}
+    .counter-item{padding:10px;border-radius:10px;}
+    .counter-item .area-name{font-size:12.5px;margin-bottom:4px;gap:4px;line-height:1.3;}
+    .counter-item .total{font-size:11px;margin-bottom:6px;}
+    .counter-item .split{gap:4px;}
+    .chip{padding:2px 6px;font-size:9.5px;}
+    .sample-tag{font-size:8px;padding:1px 4px;}
+    .counter-note{font-size:11px;padding:9px 11px;}
+    .counter-more button{font-size:12px;padding:8px 14px;}
+
+    .sup-section{padding:14px;margin-bottom:14px;}
+    .sup-section h3{font-size:16px;}
+    .sup-section .sup-sub{font-size:12px;margin-bottom:14px;}
+    .sup-cols{gap:14px;}
+
+    .sup-tanker-box{padding:10px;border-radius:10px;}
+    .sup-tanker-box svg{width:100%;height:auto;max-height:220px;display:block;}
+
+    .sup-form{padding:14px;border-radius:10px;}
+    .sup-step-label{font-size:9.5px;}
+    .sup-form input,.sup-form select,.sup-form textarea{
+      padding:12px;font-size:15px;margin-bottom:9px;
+    }
+    .sup-consent{font-size:11.5px;}
+    .sup-step-note{font-size:11px;padding:9px 10px;}
+    .sup-btn-row{flex-direction:column;gap:8px;}
+    .sup-btn-row button{padding:13px;font-size:14px;}
+
+    .filters{grid-template-columns:1fr;gap:8px;padding:12px;margin-bottom:14px;}
+    select{padding:11px 12px;font-size:14px;}
+
+    .grid{grid-template-columns:1fr;gap:12px;}
+    .card{padding:14px;}
+    .card h3{font-size:15px;}
+    .details{font-size:12px;}
+    .btn{padding:11px;font-size:13px;}
+
+    h2{font-size:16px;}
+
+    footer{padding:18px 16px;margin-top:24px;}
+    .footer-inner{grid-template-columns:1fr;gap:16px;padding-bottom:14px;}
+    .footer-left h4,.footer-right h4{font-size:13px;margin-bottom:8px;}
+    .footer-left p,.footer-right p{font-size:12px;}
+    .footer-right .save-water{font-size:11.5px;padding:9px 11px;}
+    .footer-bottom{font-size:11px;padding-top:12px;}
+
+    .modal-bg{padding:12px;}
+    .modal{padding:18px;margin:20px 0;border-radius:12px;}
+    .modal h2{font-size:17px;}
+    .modal p.sub{font-size:12px;}
+    .modal input,.modal select,.modal textarea{
+      padding:12px;font-size:15px;
+    }
+    .modal-actions{flex-direction:column;gap:8px;}
+    .modal-actions button{padding:13px;font-size:14px;width:100%;}
+  }
+
+  /* ===== VERY SMALL PHONES ===== */
+  @media (max-width:380px){
+    .header-center h1{font-size:21px;}
+    .qr-btn img{width:46px;height:46px;}
+    .qr-btn span{font-size:9px;}
+    .hero-head h2{font-size:16px;}
+    .plan-card h3{font-size:14px;}
+    .counter-grid{grid-template-columns:1fr;}
+    .day-btn .dd{font-size:11px;}
+    .day-btn .dow{font-size:6.5px;}
+    .cal-day{font-size:10px;padding:4px 0;min-height:23px;line-height:15px;}
+    .sup-tanker-box svg{max-height:180px;}
+  }
+
+  /* ===== LANDSCAPE PHONE ===== */
+  @media (max-width:900px) and (orientation:landscape){
+    .header{grid-template-columns:auto 1fr auto;grid-template-rows:auto;}
+    .header-center{grid-column:auto;grid-row:auto;}
+    .qr-btn{grid-row:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== RED HEADER ===== -->
+<div class="header">
+  <a class="qr-btn" onclick="scrollToSupplierForm(); return false;">
+    <img id="qrSup" alt="Supplier QR" />
+    <span>Register<br/>Supplier</span>
+  </a>
+
+  <div class="header-center">
+    <h1>JalSeva</h1>
+    <p>Find water tankers near you — fast</p>
+  </div>
+
+  <a class="qr-btn" onclick="scrollToSupplierList(); return false;">
+    <img id="qrFind" alt="Find supplier QR" />
+    <span>Find<br/>Supplier</span>
+  </a>
+</div>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-head">
+    <h2>JalSeva helps families get water tankers faster</h2>
+    <p>Register once and suppliers in your area can reach you directly.</p>
+  </div>
+
+  <div class="hero-cols">
+
+    <!-- LEFT: PLANNING (blue) -->
+    <div class="plan-card">
+      <span class="plan-badge">★ Advance Planning</span>
+      <h3>Plan ahead. Skip the rush.</h3>
+      <p class="plan-sub">Pick a day this week, or any date this month.</p>
+
+      <div class="daily-row" id="dailyRow"></div>
+
+      <div class="divider"><hr /><span>or pick any date</span><hr /></div>
+
+      <div class="cal">
+        <div class="cal-head">
+          <button class="nav" onclick="calPrev()">‹</button>
+          <span class="label" id="calLabel">—</span>
+          <button class="nav" onclick="calNext()">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <button class="plan-btn" id="planBtn" onclick="useAdvanceDate()" disabled>Pick a date</button>
+    </div>
+
+    <!-- RIGHT: REGISTER FORM -->
+    <div class="reg-inline">
+      <h3>Register your water need</h3>
+      <p class="reg-sub">Free. No payment. Just help us reach you faster.</p>
+
+      <div id="regStep1">
+        <div class="step-label">Step 1 of 2 · Who you are</div>
+        <input id="r1Name" placeholder="Your name" />
+        <input id="r1Phone" placeholder="Phone (10 digits)" maxlength="10" />
+        <input id="r1Area" list="areaOptions" placeholder="Type your area" />
+        <datalist id="areaOptions"></datalist>
+        <button class="btn-blue" style="width:100%;padding:11px;border-radius:8px;border:none;font-weight:600;cursor:pointer;" onclick="goStep2()">Continue →</button>
+        <div class="err-msg" id="r1Err" style="display:none;"></div>
+      </div>
+
+      <div id="regStep2" style="display:none;">
+        <div class="step-label">Step 2 of 2 · Where & what</div>
+        <div class="step-note">More details = faster delivery. Suppliers reach you without a single call back.</div>
+        <input id="r2House" placeholder="House / flat number" />
+        <input id="r2Building" placeholder="Building / society (optional)" />
+        <input id="r2Street" placeholder="Street / lane" />
+        <input id="r2Landmark" placeholder="Landmark — near ..." />
+        <label class="field">What do you need?</label>
+        <select id="r2Need">
+          <option value="">Select</option>
+          <option>Half</option><option>Full</option><option>Quarter</option><option>Not sure</option>
+        </select>
+        <label class="field">When do you need it?</label>
+        <select id="r2When">
+          <option value="">Select</option>
+          <option>This week</option><option>This month</option><option>In 1–3 months</option>
+        </select>
+        <label class="field" id="r2DateLabel">Preferred date (optional)</label>
+        <input type="date" id="r2Date" />
+        <textarea id="r2Notes" placeholder="Notes (optional)"></textarea>
+        <div class="btn-row">
+          <button class="btn-gray" onclick="goStep1()">← Back</button>
+          <button class="btn-blue" id="regBtn" onclick="submitRegister()">Submit</button>
+        </div>
+        <div class="err-msg" id="r2Err" style="display:none;"></div>
+        <div class="ok-msg" id="r2Ok" style="display:none;"></div>
+      </div>
+
+      <div class="er-strip">
+        <button class="er-emergency" onclick="openEmergency()">🚨 Emergency</button>
+        <button class="er-regular" onclick="openRegular()">💧 Regular</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== DEMAND ===== -->
+<section class="card-section">
+  <h2>📍 Where water is being requested</h2>
+  <p class="subtitle">When you register, you help your area get noticed by suppliers. More registrations = more tankers routed to your neighborhood.</p>
+  <div id="counter" class="counter-grid"><div class="empty">Loading…</div></div>
+  <div id="counterMore" class="counter-more" style="display:none;">
+    <button onclick="toggleAllAreas()" id="moreBtn">Show all areas</button>
+  </div>
+  <div id="counterNote" class="counter-note" style="display:none;"></div>
+</section>
+
+<!-- ===== SUPPLIER REGISTRATION ===== -->
+<section class="sup-section" id="supplier-form">
+  <h3>🚚 Register as a supplier</h3>
+  <p class="sup-sub">List your tanker service free. Reach families in your area. We verify before publishing.</p>
+
+  <div class="sup-cols">
+
+    <div class="sup-tanker-box">
+      <svg viewBox="0 0 560 280" preserveAspectRatio="xMidYMid meet">
+        <path d="M120 20 C 120 20, 100 55, 100 70 a 20 20 0 0 0 40 0 C 140 55, 120 20, 120 20 Z" fill="#60a5fa" opacity="0.9"/>
+        <ellipse cx="290" cy="248" rx="240" ry="8" fill="#bfdbfe" opacity="0.6"/>
+        <rect x="30" y="100" width="300" height="110" rx="14" fill="#2563eb"/>
+        <rect x="30" y="100" width="300" height="18" rx="6" fill="#1e40af" opacity="0.5"/>
+        <rect x="30" y="196" width="300" height="14" fill="#1e40af" opacity="0.6"/>
+        <line x1="100" y1="118" x2="100" y2="196" stroke="#1e40af" stroke-width="3" opacity="0.4"/>
+        <line x1="170" y1="118" x2="170" y2="196" stroke="#1e40af" stroke-width="3" opacity="0.4"/>
+        <line x1="240" y1="118" x2="240" y2="196" stroke="#1e40af" stroke-width="3" opacity="0.4"/>
+        <rect x="130" y="140" width="80" height="36" rx="4" fill="#ffffff" opacity="0.95"/>
+        <text x="170" y="162" font-size="11" text-anchor="middle" fill="#2563eb" font-weight="700" font-family="sans-serif">JALSEVA</text>
+        <path d="M330 130 L440 130 L500 175 L500 210 L330 210 Z" fill="#1e40af"/>
+        <rect x="355" y="142" width="60" height="34" rx="4" fill="#bfdbfe"/>
+        <rect x="445" y="152" width="30" height="24" rx="3" fill="#bfdbfe" opacity="0.75"/>
+        <rect x="490" y="196" width="20" height="14" rx="3" fill="#111827"/>
+        <circle cx="90" cy="218" r="24" fill="#111827"/><circle cx="90" cy="218" r="10" fill="#9ca3af"/>
+        <circle cx="180" cy="218" r="24" fill="#111827"/><circle cx="180" cy="218" r="10" fill="#9ca3af"/>
+        <circle cx="290" cy="218" r="24" fill="#111827"/><circle cx="290" cy="218" r="10" fill="#9ca3af"/>
+        <circle cx="420" cy="218" r="24" fill="#111827"/><circle cx="420" cy="218" r="10" fill="#9ca3af"/>
+        <circle cx="490" cy="218" r="24" fill="#111827"/><circle cx="490" cy="218" r="10" fill="#9ca3af"/>
+      </svg>
+    </div>
+
+    <div class="sup-form">
+      <div id="supStep1">
+        <div class="sup-step-label">Step 1 of 2 · Your contact</div>
+        <input id="s1Name" placeholder="Your name" />
+        <input id="s1ShopName" placeholder="Shop / company name" />
+        <input id="s1Phone" placeholder="Phone (10 digits)" maxlength="10" />
+        <input id="s1Whatsapp" placeholder="WhatsApp (10 digits)" maxlength="10" />
+        <input id="s1Area" placeholder="Your area / locality" />
+        <button class="btn-green" style="width:100%;padding:11px;border-radius:8px;border:none;font-weight:600;cursor:pointer;" onclick="goSupStep2()">Continue →</button>
+        <div class="err-msg" id="s1Err" style="display:none;"></div>
+      </div>
+
+      <div id="supStep2" style="display:none;">
+        <div class="sup-step-label">Step 2 of 2 · Tanker details</div>
+        <div class="sup-step-note">Tell us what you have. We'll verify before publishing your listing.</div>
+        <select id="s2TankerSize">
+          <option value="">Tanker size you have</option>
+          <option value="1000">1000L</option><option value="2000">2000L</option>
+          <option value="5000">5000L</option><option value="10000">10000L</option>
+        </select>
+        <select id="s2WaterType">
+          <option value="">Water type</option>
+          <option>Drinking</option><option>Borewell</option><option>Construction</option>
+        </select>
+        <input id="s2Rate" type="number" placeholder="Rate per tanker (₹)" />
+        <select id="s2Availability">
+          <option value="">Availability</option>
+          <option>24x7</option><option>Day</option><option>Emergency</option>
+        </select>
+        <input id="s2VehicleNo" placeholder="Vehicle number (optional)" />
+        <textarea id="s2Notes" placeholder="Anything else we should know?"></textarea>
+        <label class="sup-consent">
+          <input type="checkbox" id="s2Consent" />
+          <span>I give permission for my phone number to be shown publicly on JalSeva.</span>
+        </label>
+        <div class="sup-btn-row">
+          <button class="btn-light" onclick="goSupStep1()">← Back</button>
+          <button class="btn-green" id="supBtn" onclick="submitSupplier()">Submit application</button>
+        </div>
+        <div class="err-msg" id="s2Err" style="display:none;"></div>
+        <div class="ok-msg" id="s2Ok" style="display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== SUPPLIER LISTING ===== -->
+<h2 id="supplier-list" style="font-size:18px;margin:0 0 12px;">Available suppliers</h2>
+<div class="filters">
+  <select id="fArea" onchange="loadSuppliers()"><option value="">All areas</option></select>
+  <select id="fWater" onchange="loadSuppliers()">
+    <option value="">All water types</option>
+    <option>Drinking</option><option>Borewell</option><option>Construction</option>
+  </select>
+  <select id="fSize" onchange="loadSuppliers()">
+    <option value="">All tanker sizes</option>
+    <option value="1000">1000L</option><option value="2000">2000L</option><option value="5000">5000L</option><option value="10000">10000L</option>
+  </select>
+</div>
+<div id="results" class="grid"></div>
+
+<!-- ===== FOOTER (RED) ===== -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <h4>📞 Contact JalSeva</h4>
+      <p><b>Phone:</b> <a href="tel:+919999999999">+91 99999 99999</a></p>
+      <p><b>WhatsApp:</b> <a href="https://wa.me/919999999999" target="_blank" rel="noopener">+91 99999 99999</a></p>
+      <p><b>Email:</b> <a href="mailto:hello@jalseva.in">hello@jalseva.in</a></p>
+      <p><b>Area:</b> Indore, Madhya Pradesh</p>
+    </div>
+    <div class="footer-right">
+      <h4>💧 Why JalSeva matters</h4>
+      <p>Water is life. Every drop we share, save, or route smarter keeps a family, a school, a hospital running. JalSeva exists so no household waits in line for a tanker in peak summer.</p>
+      <p class="save-water">🌱 <b>Save water.</b> Fix leaks. Reuse where you can. Book only what you need. Small habits, big difference.</p>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    JalSeva is a directory only. Water quality, rates and service are the responsibility of the supplier.
+    <br/>© JalSeva · <a href="/admin">Admin</a>
+  </div>
+</footer>
+
+<div class="modal-bg" id="modal"><div class="modal" id="modalContent"></div></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwY3zm68dSXbPPACgqopteJKHNQa-ghR6jNVi-ckHUG1hzHYFI0DxXCauw_LoR_xkLXjA/exec';
+const TOKEN = '12345678910';
+
+let areaList = [];
+let prefilledDate = '';
+let showAllAreas = false;
+const AREAS_VISIBLE = 12;
+
+function cleanPhone(p){const d=String(p||'').replace(/\D/g,'');return d.length===10?'91'+d:d;}
+function openModal(html){ document.getElementById('modalContent').innerHTML = html; document.getElementById('modal').classList.add('open'); }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+function scrollToSupplierForm(){
+  document.getElementById('supplier-form').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function scrollToSupplierList(){
+  document.getElementById('supplier-list').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function setupQR(){
+  const base = window.location.origin + window.location.pathname;
+  const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=0&data=';
+  const mock = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="#f3f4f6"/>
+      <rect x="8" y="8" width="24" height="24" fill="#111827"/>
+      <rect x="12" y="12" width="16" height="16" fill="#f3f4f6"/>
+      <rect x="16" y="16" width="8" height="8" fill="#111827"/>
+      <rect x="68" y="8" width="24" height="24" fill="#111827"/>
+      <rect x="72" y="12" width="16" height="16" fill="#f3f4f6"/>
+      <rect x="76" y="16" width="8" height="8" fill="#111827"/>
+      <rect x="8" y="68" width="24" height="24" fill="#111827"/>
+      <rect x="12" y="72" width="16" height="16" fill="#f3f4f6"/>
+      <rect x="16" y="76" width="8" height="8" fill="#111827"/>
+      <rect x="40" y="40" width="20" height="20" fill="#16a34a"/>
+    </svg>
+  `);
+  const q1 = document.getElementById('qrSup');
+  q1.onerror = () => { q1.onerror = null; q1.src = mock; };
+  q1.src = qrApi + encodeURIComponent(base + '#supplier-form');
+
+  const q2 = document.getElementById('qrFind');
+  q2.onerror = () => { q2.onerror = null; q2.src = mock; };
+  q2.src = qrApi + encodeURIComponent(base + '#supplier-list');
+}
+
+function handleUrlParam(){
+  const p = new URLSearchParams(window.location.search);
+  const o = p.get('open');
+  if (o === 'emergency') setTimeout(openEmergency, 300);
+  if (o === 'regular') setTimeout(openRegular, 300);
+}
+
+async function loadAreas(){
+  try {
+    const r = await fetch(API + '?action=areas');
+    const d = await r.json();
+    areaList = d.areas || [];
+    const sel = document.getElementById('fArea');
+    const dl = document.getElementById('areaOptions');
+    areaList.forEach(a => {
+      const o = document.createElement('option'); o.value = a; o.textContent = a; sel.appendChild(o);
+      const opt = document.createElement('option'); opt.value = a; dl.appendChild(opt);
+    });
+  } catch(e){ console.error(e); }
+}
+
+const SAMPLE_AREAS = [
+  { area: 'Vijay Nagar', total: 47, half: 22, full: 15, quarter: 10 },
+  { area: 'Rau',         total: 32, half: 14, full: 12, quarter: 6 },
+  { area: 'Palasia',     total: 21, half: 9,  full: 8,  quarter: 4 },
+  { area: 'Bhawarkuan',  total: 15, half: 7,  full: 5,  quarter: 3 }
+];
+let counterData = [];
+let counterIsSample = false;
+
+async function loadCounter(){
+  try {
+    const r = await fetch(API + '?action=counter');
+    const d = await r.json();
+    const list = d.areas || [];
+    if (!list.length){ counterData = SAMPLE_AREAS; counterIsSample = true; }
+    else { counterData = list; counterIsSample = false; }
+    renderCounter();
+  } catch(e){ counterData = SAMPLE_AREAS; counterIsSample = true; renderCounter(); }
+}
+
+function renderCounter(){
+  const box = document.getElementById('counter');
+  const noteBox = document.getElementById('counterNote');
+  const moreBox = document.getElementById('counterMore');
+
+  if (!counterData.length){
+    box.innerHTML = '<div class="empty">No registrations yet. Be the first in your area.</div>';
+    noteBox.style.display = 'none'; moreBox.style.display = 'none';
+    return;
+  }
+  const visible = showAllAreas ? counterData : counterData.slice(0, AREAS_VISIBLE);
+  box.innerHTML = visible.map(a => renderCounterCard(a, counterIsSample)).join('');
+
+  if (counterData.length > AREAS_VISIBLE){
+    moreBox.style.display = 'block';
+    document.getElementById('moreBtn').textContent = showAllAreas
+      ? 'Show fewer areas'
+      : `Show all ${counterData.length} areas`;
+  } else { moreBox.style.display = 'none'; }
+
+  if (counterIsSample){
+    noteBox.style.display = 'block';
+    noteBox.innerHTML = '👆 <b>These are sample areas for preview.</b> Be the first in your area — register and your area will appear here for real.';
+  } else { noteBox.style.display = 'none'; }
+}
+
+function toggleAllAreas(){ showAllAreas = !showAllAreas; renderCounter(); }
+
+function renderCounterCard(a, isSample){
+  const tag = isSample ? '<span class="sample-tag">Sample</span>' : '';
+  return `
+    <div class="counter-item">
+      <div class="area-name">${a.area}${tag}</div>
+      <div class="total">${a.total} famil${a.total===1?'y':'ies'}</div>
+      <div class="split">
+        <span class="chip half">${a.half} half</span>
+        <span class="chip full">${a.full} full</span>
+        <span class="chip quarter">${a.quarter} quarter</span>
+      </div>
+    </div>
+  `;
+}
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW = ['S','M','T','W','T','F','S'];
+const DOW_LONG = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let calMonth = new Date().getMonth();
+let calYear = new Date().getFullYear();
+let pickedDate = null;
+
+function renderDailyRow(){
+  const row = document.getElementById('dailyRow');
+  row.innerHTML = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 0; i < 7; i++){
+    const d = new Date(today.getTime() + i * 24*60*60*1000);
+    const btn = document.createElement('div');
+    btn.className = 'day-btn';
+    if (i === 0) btn.classList.add('today');
+    if (pickedDate && d.getTime() === pickedDate.getTime()) btn.classList.add('selected');
+    const label = i === 0 ? 'Today' : DOW_LONG[d.getDay()];
+    btn.innerHTML = `<div class="dow">${label}</div><div class="dd">${d.getDate()}</div>`;
+    btn.onclick = () => selectDate(new Date(d), null, btn);
+    row.appendChild(btn);
+  }
+}
+
+function renderCalendar(){
+  document.getElementById('calLabel').textContent = MONTHS[calMonth] + ' ' + calYear;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  DOW.forEach(d => { const el = document.createElement('div'); el.className = 'cal-dow'; el.textContent = d; grid.appendChild(el); });
+
+  const first = new Date(calYear, calMonth, 1);
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const startDow = first.getDay();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  for (let i = 0; i < startDow; i++){
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+  for (let d = 1; d <= daysInMonth; d++){
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    el.textContent = d;
+    const dateObj = new Date(calYear, calMonth, d); dateObj.setHours(0,0,0,0);
+    if (dateObj < today){ el.classList.add('past'); }
+    else { el.onclick = () => selectDate(dateObj, el, null); }
+    if (dateObj.getTime() === today.getTime()) el.classList.add('today');
+    if (pickedDate && dateObj.getTime() === pickedDate.getTime()) el.classList.add('selected');
+    grid.appendChild(el);
+  }
+  updatePlanButton();
+}
+
+function selectDate(dateObj, calEl, dayEl){
+  pickedDate = dateObj;
+  document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
+  document.querySelectorAll('.day-btn').forEach(d => d.classList.remove('selected'));
+  if (calEl) calEl.classList.add('selected');
+  if (dayEl) dayEl.classList.add('selected');
+  updatePlanButton();
+}
+
+function updatePlanButton(){
+  const btn = document.getElementById('planBtn');
+  if (!pickedDate){ btn.disabled = true; btn.textContent = 'Pick a date'; return; }
+  const opts = { day: 'numeric', month: 'short', year: 'numeric' };
+  btn.disabled = false;
+  btn.textContent = 'Use ' + pickedDate.toLocaleDateString('en-IN', opts) + ' →';
+}
+
+function calPrev(){ calMonth--; if (calMonth < 0){ calMonth = 11; calYear--; } renderCalendar(); }
+function calNext(){ calMonth++; if (calMonth > 11){ calMonth = 0; calYear++; } renderCalendar(); }
+
+function useAdvanceDate(){
+  if (!pickedDate) return;
+  const yyyy = pickedDate.getFullYear();
+  const mm = String(pickedDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(pickedDate.getDate()).padStart(2, '0');
+  prefilledDate = `${yyyy}-${mm}-${dd}`;
+  goStep1();
+  const r1 = document.getElementById('r1Err');
+  r1.style.background = '#fff';
+  r1.style.color = '#1e3a8a';
+  r1.textContent = '📅 Date selected: ' + pickedDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) + '. Fill your details below.';
+  r1.style.display = 'block';
+}
+
+function goStep1(){
+  document.getElementById('regStep1').style.display = 'block';
+  document.getElementById('regStep2').style.display = 'none';
+}
+function goStep2(){
+  const name = document.getElementById('r1Name').value.trim();
+  const phone = document.getElementById('r1Phone').value.trim();
+  const area = document.getElementById('r1Area').value.trim();
+  const err = document.getElementById('r1Err');
+  if (!name || !phone || !area){
+    err.style.color = '#991b1b';
+    err.textContent = 'Please fill name, phone and area.';
+    err.style.display = 'block';
+    return;
+  }
+  if (!/^[0-9]{10}$/.test(phone)){
+    err.style.color = '#991b1b';
+    err.textContent = 'Phone must be 10 digits.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  document.getElementById('regStep1').style.display = 'none';
+  document.getElementById('regStep2').style.display = 'block';
+
+  const dateInput = document.getElementById('r2Date');
+  const dateLabel = document.getElementById('r2DateLabel');
+  if (prefilledDate){
+    dateInput.value = prefilledDate;
+    dateLabel.textContent = 'Preferred date (pre-filled from Advance Planning)';
+  } else {
+    dateInput.value = '';
+    dateLabel.textContent = 'Preferred date (optional)';
+  }
+}
+
+async function submitRegister(){
+  const btn = document.getElementById('regBtn');
+  const err = document.getElementById('r2Err');
+  const ok = document.getElementById('r2Ok');
+  err.style.display = 'none'; ok.style.display = 'none';
+
+  const need = document.getElementById('r2Need').value;
+  const when = document.getElementById('r2When').value;
+  if (!need || !when){
+    err.textContent = 'Please select what you need and when.';
+    err.style.display = 'block';
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  const qs = new URLSearchParams({
+    action: 'register', token: TOKEN,
+    name: document.getElementById('r1Name').value.trim(),
+    phone: document.getElementById('r1Phone').value.trim(),
+    area: document.getElementById('r1Area').value.trim(),
+    house: document.getElementById('r2House').value.trim(),
+    building: document.getElementById('r2Building').value.trim(),
+    street: document.getElementById('r2Street').value.trim(),
+    landmark: document.getElementById('r2Landmark').value.trim(),
+    need: need, when: when,
+    notes: document.getElementById('r2Notes').value.trim()
+  });
+
+  try {
+    const r = await fetch(API + '?' + qs);
+    const d = await r.json();
+    if (d.success){
+      const name = document.getElementById('r1Name').value.trim();
+      const area = document.getElementById('r1Area').value.trim();
+      const counter = await fetch(API + '?action=counter').then(r=>r.json());
+      const mine = (counter.areas||[]).find(a => a.area.toLowerCase() === area.toLowerCase());
+      const total = mine ? mine.total : 1;
+      ok.innerHTML = `✓ Thank you, <b>${name}</b>. You're one of <b>${total}</b> famil${total===1?'y':'ies'} in <b>${area}</b> on JalSeva.`;
+      ok.style.display = 'block';
+      ['r1Name','r1Phone','r1Area','r2House','r2Building','r2Street','r2Landmark','r2Date','r2Notes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('r2Need').value = '';
+      document.getElementById('r2When').value = '';
+      prefilledDate = '';
+      pickedDate = null;
+      renderDailyRow(); renderCalendar();
+      loadCounter();
+      goStep1();
+    } else throw new Error(d.error || 'Failed');
+  } catch(e){
+    err.textContent = 'Error: ' + e.message;
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit';
+  }
+}
+
+function goSupStep1(){
+  document.getElementById('supStep1').style.display = 'block';
+  document.getElementById('supStep2').style.display = 'none';
+}
+function goSupStep2(){
+  const err = document.getElementById('s1Err');
+  const name = document.getElementById('s1Name').value.trim();
+  const shopName = document.getElementById('s1ShopName').value.trim();
+  const phone = document.getElementById('s1Phone').value.trim();
+  const whatsapp = document.getElementById('s1Whatsapp').value.trim();
+  const area = document.getElementById('s1Area').value.trim();
+
+  if (!name || !shopName || !phone || !whatsapp || !area){
+    err.textContent = 'Please fill all fields.';
+    err.style.display = 'block';
+    return;
+  }
+  if (!/^[0-9]{10}$/.test(phone) || !/^[0-9]{10}$/.test(whatsapp)){
+    err.textContent = 'Phone and WhatsApp must be 10 digits.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  document.getElementById('supStep1').style.display = 'none';
+  document.getElementById('supStep2').style.display = 'block';
+}
+
+async function submitSupplier(){
+  const btn = document.getElementById('supBtn');
+  const err = document.getElementById('s2Err');
+  const ok = document.getElementById('s2Ok');
+  err.style.display = 'none'; ok.style.display = 'none';
+
+  const tankerSize = document.getElementById('s2TankerSize').value;
+  const waterType = document.getElementById('s2WaterType').value;
+  const rate = document.getElementById('s2Rate').value;
+  const availability = document.getElementById('s2Availability').value;
+  const consent = document.getElementById('s2Consent').checked;
+
+  if (!tankerSize || !waterType || !rate || !availability){
+    err.textContent = 'Please fill all required fields.';
+    err.style.display = 'block';
+    return;
+  }
+  if (!consent){
+    err.textContent = 'Please give permission to show your phone number.';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  const qs = new URLSearchParams({
+    action: 'application', token: TOKEN,
+    name: document.getElementById('s1Name').value.trim(),
+    shopName: document.getElementById('s1ShopName').value.trim(),
+    phone: document.getElementById('s1Phone').value.trim(),
+    whatsapp: document.getElementById('s1Whatsapp').value.trim(),
+    area: document.getElementById('s1Area').value.trim(),
+    tankerSize: tankerSize,
+    waterType: waterType,
+    rate: rate,
+    availability: availability,
+    vehicleNo: document.getElementById('s2VehicleNo').value.trim(),
+    notes: document.getElementById('s2Notes').value.trim()
+  });
+
+  try {
+    const r = await fetch(API + '?' + qs);
+    const d = await r.json();
+    if (d.success){
+      ok.textContent = '✓ Thank you. We received your application. We will verify and contact you soon.';
+      ok.style.display = 'block';
+      ['s1Name','s1ShopName','s1Phone','s1Whatsapp','s1Area','s2Rate','s2VehicleNo','s2Notes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('s2TankerSize').value = '';
+      document.getElementById('s2WaterType').value = '';
+      document.getElementById('s2Availability').value = '';
+      document.getElementById('s2Consent').checked = false;
+      goSupStep1();
+    } else throw new Error(d.error || 'Failed');
+  } catch(e){
+    err.textContent = 'Error: ' + e.message;
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit application';
+  }
+}
+
+function openEmergency(){
+  openModal(`
+    <h2>🚨 Emergency Water Request</h2>
+    <p class="sub">Urgent — we'll find you a tanker now.</p>
+    <form id="reqForm">
+      <input required name="name" placeholder="Your name" />
+      <input required name="phone" placeholder="Phone (10 digits)" pattern="[0-9]{10}" />
+      <input required name="area" placeholder="Area / locality" />
+      <input required name="address" placeholder="Full address / landmark" />
+      <select required name="tankerSize"><option value="">Tanker size</option><option value="1000">1000L</option><option value="2000">2000L</option><option value="5000">5000L</option><option value="10000">10000L</option></select>
+      <select required name="waterType"><option value="">Water type</option><option>Drinking</option><option>Borewell</option><option>Construction</option></select>
+      <select name="urgency"><option>Within 1 hour</option><option>Within 3 hours</option><option>Today</option></select>
+      <textarea name="notes" placeholder="Notes (optional)"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="send" id="reqBtn">Send Emergency</button>
+      </div>
+      <p id="reqErr" class="err-msg" style="display:none"></p>
+    </form>
+  `);
+  document.getElementById('reqForm').addEventListener('submit', e => submitRequest(e, 'Emergency'));
+}
+
+function openRegular(){
+  openModal(`
+    <h2>💧 Regular Booking</h2>
+    <p class="sub">For today or tomorrow. Not urgent.</p>
+    <form id="reqForm">
+      <input required name="name" placeholder="Your name" />
+      <input required name="phone" placeholder="Phone (10 digits)" pattern="[0-9]{10}" />
+      <input required name="area" placeholder="Area / locality" />
+      <input required name="address" placeholder="Full address / landmark" />
+      <select required name="tankerSize"><option value="">Tanker size</option><option value="1000">1000L</option><option value="2000">2000L</option><option value="5000">5000L</option><option value="10000">10000L</option></select>
+      <select required name="waterType"><option value="">Water type</option><option>Drinking</option><option>Borewell</option><option>Construction</option></select>
+      <select name="urgency"><option>Today</option><option>Tomorrow</option></select>
+      <textarea name="notes" placeholder="Notes (optional)"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="send-regular" id="reqBtn">Send Regular</button>
+      </div>
+      <p id="reqErr" class="err-msg" style="display:none"></p>
+    </form>
+  `);
+  document.getElementById('reqForm').addEventListener('submit', e => submitRequest(e, 'Regular'));
+}
+
+async function submitRequest(e, type){
+  e.preventDefault();
+  const btn = document.getElementById('reqBtn');
+  const err = document.getElementById('reqErr');
+  btn.disabled = true; btn.textContent = 'Sending…'; err.style.display = 'none';
+  const f = e.target;
+  const qs = new URLSearchParams({
+    action: 'request', token: TOKEN,
+    name: f.name.value, phone: f.phone.value, area: f.area.value,
+    address: f.address.value, tankerSize: f.tankerSize.value,
+    waterType: f.waterType.value, urgency: f.urgency.value, notes: f.notes.value
+  });
+  try {
+    const r = await fetch(API + '?' + qs);
+    const d = await r.json();
+    if (d.success){
+      openModal(`<div class="success"><h2>Request Sent</h2><p style="color:#6b7280;margin-top:8px">We will contact you shortly.</p><button onclick="closeModal()">Close</button></div>`);
+    } else throw new Error(d.error || 'Failed');
+  } catch(e2){
+    err.textContent = 'Error: ' + e2.message;
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Send ' + type;
+  }
+}
+
+async function loadSuppliers(){
+  const box = document.getElementById('results');
+  box.innerHTML = '<p class="loading" style="grid-column:1/-1">Loading…</p>';
+  const qs = new URLSearchParams({action:'suppliers'});
+  const area = document.getElementById('fArea').value;
+  const water = document.getElementById('fWater').value;
+  const size = document.getElementById('fSize').value;
+  if (area) qs.set('area', area);
+  if (water) qs.set('waterType', water);
+  if (size) qs.set('tankerSize', size);
+  try {
+    const r = await fetch(API + '?' + qs);
+    const d = await r.json();
+    const list = d.suppliers || [];
+    if (!list.length){ box.innerHTML = '<p class="empty" style="grid-column:1/-1">No suppliers found.</p>'; return; }
+    box.innerHTML = list.map(renderCard).join('');
+  } catch(e){ box.innerHTML = '<p class="empty" style="grid-column:1/-1">Failed to load.</p>'; }
+}
+
+function renderCard(s){
+  const phone = cleanPhone(s.WhatsApp || s.Phone);
+  const verified = String(s.Verified).toLowerCase()==='yes' ? '<span class="badge">✓ Verified</span>' : '';
+  const safeName = String(s.ShopName || s.Name || '').replace(/'/g, "\\'").replace(/"/g,'&quot;');
+  const safeArea = String(s.Area || '').replace(/'/g, "\\'").replace(/"/g,'&quot;');
+  return `<div class="card">
+    <div class="card-top"><div><h3>${s.ShopName||s.Name}</h3><p class="area-name">${s.Area}</p></div>${verified}</div>
+    <div class="details">
+      <div><span>Tanker:</span> ${s.TankerSize}L</div>
+      <div><span>Type:</span> ${s.WaterType}</div>
+      <div><span>Rate:</span> ₹${s.Rate}</div>
+      <div><span>Hours:</span> ${s.Availability}</div>
+    </div>
+    <div class="actions">
+      <button class="btn call" onclick="gateContact('call','${s.Phone}','${safeName}','${safeArea}','${s.TankerSize}','${s.WaterType}')">📞 Call</button>
+      <button class="btn wa" onclick="gateContact('wa','${phone}','${safeName}','${safeArea}','${s.TankerSize}','${s.WaterType}')">WhatsApp</button>
+    </div>
+  </div>`;
+}
+
+// ============ CONTACT GATE ============
+let pendingContact = null;
+
+function gateContact(type, phone, name, area, size, water){
+  const saved = localStorage.getItem('jalseva_user');
+  if (saved){
+    openContact(type, phone, name, area, size, water);
+    return;
+  }
+  pendingContact = { type, phone, name, area, size, water };
+  openContactGate();
+}
+
+function openContactGate(){
+  openModal(`
+    <h2>One quick step</h2>
+    <p class="sub">Please share your water requirement first. Then we connect you directly — takes 30 seconds.</p>
+
+    <div id="gateStep1">
+      <div class="step-label">Step 1 of 2 · Who you are</div>
+      <input id="g1Name" placeholder="Your name" />
+      <input id="g1Phone" placeholder="Phone (10 digits)" maxlength="10" />
+      <input id="g1Area" list="areaOptions" placeholder="Type your area" />
+      <button class="btn-blue" style="width:100%;padding:11px;border-radius:8px;border:none;font-weight:600;cursor:pointer;" onclick="gateGoStep2()">Continue →</button>
+      <div class="err-msg" id="g1Err" style="display:none;"></div>
+    </div>
+
+    <div id="gateStep2" style="display:none;">
+      <div class="step-label">Step 2 of 2 · Where & what</div>
+      <div class="step-note">We share this with the supplier so they reach you without a call back.</div>
+      <input id="g2House" placeholder="House / flat number" />
+      <input id="g2Building" placeholder="Building / society (optional)" />
+      <input id="g2Street" placeholder="Street / lane" />
+      <input id="g2Landmark" placeholder="Landmark — near ..." />
+      <label class="field">What do you need?</label>
+      <select id="g2Need">
+        <option value="">Select</option>
+        <option>Half</option><option>Full</option><option>Quarter</option><option>Not sure</option>
+      </select>
+      <label class="field">When do you need it?</label>
+      <select id="g2When">
+        <option value="">Select</option>
+        <option>This week</option><option>This month</option><option>In 1–3 months</option>
+      </select>
+      <textarea id="g2Notes" placeholder="Notes (optional)"></textarea>
+      <div class="modal-actions">
+        <button type="button" class="cancel" onclick="gateBack()">← Back</button>
+        <button type="button" class="send" id="gateBtn" onclick="submitGate()">Submit & Connect</button>
+      </div>
+      <div class="err-msg" id="g2Err" style="display:none;"></div>
+    </div>
+  `);
+}
+
+function gateGoStep2(){
+  const name = document.getElementById('g1Name').value.trim();
+  const phone = document.getElementById('g1Phone').value.trim();
+  const area = document.getElementById('g1Area').value.trim();
+  const err = document.getElementById('g1Err');
+  if (!name || !phone || !area){
+    err.textContent = 'Please fill name, phone and area.';
+    err.style.display = 'block';
+    return;
+  }
+  if (!/^[0-9]{10}$/.test(phone)){
+    err.textContent = 'Phone must be 10 digits.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  document.getElementById('gateStep1').style.display = 'none';
+  document.getElementById('gateStep2').style.display = 'block';
+}
+
+function gateBack(){
+  document.getElementById('gateStep1').style.display = 'block';
+  document.getElementById('gateStep2').style.display = 'none';
+}
+
+async function submitGate(){
+  const btn = document.getElementById('gateBtn');
+  const err = document.getElementById('g2Err');
+  err.style.display = 'none';
+
+  const need = document.getElementById('g2Need').value;
+  const when = document.getElementById('g2When').value;
+  if (!need || !when){
+    err.textContent = 'Please select what you need and when.';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Connecting…';
+
+  const data = {
+    name: document.getElementById('g1Name').value.trim(),
+    phone: document.getElementById('g1Phone').value.trim(),
+    area: document.getElementById('g1Area').value.trim(),
+    house: document.getElementById('g2House').value.trim(),
+    building: document.getElementById('g2Building').value.trim(),
+    street: document.getElementById('g2Street').value.trim(),
+    landmark: document.getElementById('g2Landmark').value.trim(),
+    need: need,
+    when: when,
+    notes: document.getElementById('g2Notes').value.trim()
+  };
+
+  const qs = new URLSearchParams({ action: 'register', token: TOKEN, ...data });
+
+  try {
+    const r = await fetch(API + '?' + qs);
+    const d = await r.json();
+    if (d.success){
+      localStorage.setItem('jalseva_user', JSON.stringify({
+        name: data.name, phone: data.phone, area: data.area, ts: Date.now()
+      }));
+
+      const pc = pendingContact;
+      pendingContact = null;
+
+      openModal(`
+        <div class="success">
+          <h2>Thank you</h2>
+          <p style="color:#6b7280;margin-top:8px">We will connect you soon.</p>
+          <button onclick="gateContinue()">Continue to contact</button>
+        </div>
+      `);
+      loadCounter();
+    } else throw new Error(d.error || 'Failed');
+  } catch(e){
+    err.textContent = 'Error: ' + e.message;
+    err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Submit & Connect';
+  }
+}
+
+function gateContinue(){
+  const pc = pendingContact;
+  pendingContact = null;
+  closeModal();
+  if (pc) openContact(pc.type, pc.phone, pc.name, pc.area, pc.size, pc.water);
+  else {
+    // If for some reason pending was lost, just close
+    closeModal();
+  }
+}
+
+function openContact(type, phone, name, area, size, water){
+  if (type === 'call'){
+    window.location.href = 'tel:' + phone;
+  } else {
+    const msg = encodeURIComponent('Hello ' + name + ', I found you on JalSeva. I need a ' + size + 'L ' + water + ' water tanker in ' + area + '. Are you available?');
+    window.open('https://wa.me/' + phone + '?text=' + msg, '_blank');
+  }
+}
+
+setupQR();
+handleUrlParam();
+loadAreas();
+loadCounter();
+loadSuppliers();
+renderDailyRow();
+renderCalendar();
+</script>
+</body>
+</html>

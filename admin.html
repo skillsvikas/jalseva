@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JalSeva Admin</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f7f8fa;color:#111;padding:16px;max-width:1200px;margin:0 auto;}
+  .gate{max-width:340px;margin:100px auto;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:26px;text-align:center;}
+  .gate h1{font-size:22px;margin-bottom:8px;}
+  .gate p{color:#6b7280;font-size:13px;margin-bottom:18px;}
+  .gate input{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;margin-bottom:12px;}
+  .gate button{width:100%;padding:12px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;}
+  .gate button:hover{background:#1d4ed8;}
+  .gate .err{color:#dc2626;font-size:13px;margin-top:10px;}
+  .admin{display:none;}
+  .admin.on{display:block;}
+  h1.title{font-size:22px;margin-bottom:14px;}
+  h1.title span{color:#6b7280;font-size:13px;font-weight:400;margin-left:8px;}
+  .bar{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;}
+  .bar input{padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;width:100%;}
+  .bar button{padding:10px 18px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:500;}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+  .filters button{padding:7px 14px;border-radius:999px;border:1px solid #e5e7eb;background:#fff;font-size:13px;cursor:pointer;color:#374151;}
+  .filters button.active{background:#2563eb;color:#fff;border-color:#2563eb;}
+  .summary{background:#eff6ff;border:1px solid #93c5fd;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:#1e3a8a;}
+  .group{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:16px;}
+  .group h2{font-size:15px;margin-bottom:12px;color:#111;text-transform:uppercase;letter-spacing:0.5px;}
+  .group h2 .count{color:#6b7280;font-weight:400;margin-left:6px;font-size:13px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{padding:8px 6px;text-align:left;border-bottom:1px solid #f3f4f6;}
+  th{font-size:11px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;}
+  td{color:#374151;}
+  td.name{font-weight:600;color:#111;}
+  td.phone a{color:#2563eb;text-decoration:none;}
+  .empty{text-align:center;color:#9ca3af;padding:40px;font-size:14px;}
+  .back{display:inline-block;margin-bottom:14px;color:#6b7280;font-size:13px;text-decoration:none;}
+  .back:hover{color:#2563eb;}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <h1>JalSeva Admin</h1>
+  <p>Enter password to view registrations</p>
+  <input id="pw" type="password" placeholder="Password" autofocus />
+  <button onclick="tryLogin()">Enter</button>
+  <div class="err" id="gateErr" style="display:none">Wrong password.</div>
+</div>
+
+<div class="admin" id="admin">
+  <a class="back" href="/">← Back to site</a>
+  <h1 class="title">Registrations <span id="totalCount"></span></h1>
+
+  <div class="bar">
+    <input id="search" placeholder="Search by area..." oninput="render()" />
+    <button onclick="load()">Refresh</button>
+  </div>
+
+  <div class="filters">
+    <button class="active" data-need="All" onclick="setNeed('All', this)">All</button>
+    <button data-need="Half" onclick="setNeed('Half', this)">Half</button>
+    <button data-need="Full" onclick="setNeed('Full', this)">Full</button>
+    <button data-need="Quarter" onclick="setNeed('Quarter', this)">Quarter</button>
+    <button data-need="Not sure" onclick="setNeed('Not sure', this)">Not sure</button>
+  </div>
+
+  <div id="summary" class="summary" style="display:none"></div>
+  <div id="results"></div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwY3zm68dSXbPPACgqopteJKHNQa-ghR6jNVi-ckHUG1hzHYFI0DxXCauw_LoR_xkLXjA/exec';
+const TOKEN = '12345678910';
+const PASSWORD = 'indorewater';
+
+let allRows = [];
+let currentNeed = 'All';
+
+function tryLogin(){
+  const v = document.getElementById('pw').value;
+  if (v === PASSWORD){
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('admin').classList.add('on');
+    load();
+  } else {
+    document.getElementById('gateErr').style.display = 'block';
+  }
+}
+
+document.getElementById('pw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') tryLogin();
+});
+
+async function load(){
+  const box = document.getElementById('results');
+  box.innerHTML = '<div class="empty">Loading…</div>';
+  try {
+    const r = await fetch(API + '?action=register_data&token=' + TOKEN);
+    const d = await r.json();
+    if (d.error){ box.innerHTML = '<div class="empty">Error: ' + d.error + '</div>'; return; }
+    allRows = d.data || [];
+    document.getElementById('totalCount').textContent = '— ' + allRows.length + ' total';
+    render();
+  } catch(e){
+    box.innerHTML = '<div class="empty">Failed to load.</div>';
+  }
+}
+
+function setNeed(need, btn){
+  currentNeed = need;
+  document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render(){
+  const search = (document.getElementById('search').value || '').trim().toLowerCase();
+  let rows = allRows.slice();
+
+  if (search) rows = rows.filter(r => String(r.Area||'').toLowerCase().includes(search));
+  if (currentNeed !== 'All') rows = rows.filter(r => String(r.Need||'').trim() === currentNeed);
+
+  const box = document.getElementById('results');
+  const summary = document.getElementById('summary');
+
+  if (!rows.length){
+    box.innerHTML = '<div class="empty">No registrations match.</div>';
+    summary.style.display = 'none';
+    return;
+  }
+
+  // Summary for searched area
+  if (search){
+    const counts = { Half:0, Full:0, Quarter:0, 'Not sure':0 };
+    const allForArea = allRows.filter(r => String(r.Area||'').toLowerCase().includes(search));
+    allForArea.forEach(r => { const n = String(r.Need||'').trim(); if (counts[n] !== undefined) counts[n]++; });
+    summary.style.display = 'block';
+    summary.innerHTML = `<b>${allForArea[0].Area}</b> — ${allForArea.length} families · ${counts.Half} half · ${counts.Full} full · ${counts.Quarter} quarter${counts['Not sure'] ? ' · '+counts['Not sure']+' unsure' : ''}`;
+  } else {
+    summary.style.display = 'none';
+  }
+
+  // Group by Need type
+  const groups = { Half: [], Full: [], Quarter: [], 'Not sure': [] };
+  rows.forEach(r => {
+    const n = String(r.Need||'').trim() || 'Not sure';
+    if (groups[n]) groups[n].push(r);
+    else groups['Not sure'].push(r);
+  });
+
+  // Sort within each group by Building then Area
+  Object.keys(groups).forEach(k => {
+    groups[k].sort((a,b) => {
+      const b1 = (String(a.Building||'') + String(a.Area||'')).toLowerCase();
+      const b2 = (String(b.Building||'') + String(b.Area||'')).toLowerCase();
+      return b1.localeCompare(b2);
+    });
+  });
+
+  let html = '';
+  ['Half','Full','Quarter','Not sure'].forEach(k => {
+    const list = groups[k];
+    if (!list.length) return;
+    html += `<div class="group"><h2>${k} TANKER <span class="count">(${list.length})</span></h2>
+      <table><thead><tr>
+        <th>Name</th><th>Phone</th><th>Area</th><th>House</th><th>Building</th><th>Landmark</th><th>When</th><th>Notes</th>
+      </tr></thead><tbody>`;
+    list.forEach(r => {
+      const phone = String(r.Phone||'');
+      html += `<tr>
+        <td class="name">${r.Name||''}</td>
+        <td class="phone"><a href="tel:${phone}">${phone}</a></td>
+        <td>${r.Area||''}</td>
+        <td>${r.House||''}</td>
+        <td>${r.Building||''}</td>
+        <td>${r.Landmark||''}</td>
+        <td>${r.When||''}</td>
+        <td>${r.Notes||''}</td>
+      </tr>`;
+    });
+    html += '</tbody></table></div>';
+  });
+
+  box.innerHTML = html;
+}
+</script>
+</body>
+</html>
